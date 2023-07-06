@@ -1,25 +1,30 @@
-#import numeric
-from numeric import *
+# import numeric
+# from numeric import *
+from problem import Numeric
 
 # problem/Convex.txt
 
+
 def main():
     # Create an instance of numerical optimization problem
-    p = createProblem()   # 'p': (expr, domain)
+    p = Numeric()
+    p.setVariables()  # 'p': (expr, domain)
     # Call the search algorithm
     solution, minimum = steepestAscent(p)
     # Show the problem and algorithm settings
-    describeProblem(p)
-    displaySetting()
+    p.storeResult(solution, minimum)
+    p.describe()
+    displaySetting(p)
     # Report results
-    displayResult(solution, minimum)
+    p.report()
+
 
 def steepestAscent(p):
-    current = randomInit(p) # 'current' is a list of values
-    valueC = evaluate(current, p)
+    current = p.randominit()  # 'current' is a list of values
+    valueC = p.evaluate(current)
     while True:
-        neighbors = mutants(current, p)
-        successor, valueS = bestOf(neighbors, p)
+        neighbors = p.mutants(current)
+        successor, valueS = bestOf(p, neighbors)
         if valueS >= valueC:
             break
         else:
@@ -27,32 +32,25 @@ def steepestAscent(p):
             valueC = valueS
     return current, valueC
 
-def mutants(current, p): ###
-    neighbors = []
-    for i in range(len(current)):
-        mutant = mutate(current, i, DELTA, p)
-        neighbors.append(mutant)
-        mutant = mutate(current, i, -DELTA, p)
-        neighbors.append(mutant)
 
-    return neighbors     # Return a set of successors
-
-def bestOf(neighbors, p): ###
+def bestOf(p, neighbors):  ###
     best = neighbors[0]
-    bestValue = evaluate(best, p)
+    bestValue = p.evaluate(best)
 
     for i in range(1, len(neighbors)):
-        newValue = evaluate(neighbors[i], p)
+        newValue = p.evaluate(neighbors[i])
         if bestValue > newValue:
             best = neighbors[i]
             bestValue = newValue
 
     return best, bestValue
 
-def displaySetting():
+
+def displaySetting(p):
     print()
     print("Search algorithm: Steepest-Ascent Hill Climbing")
     print()
-    print("Mutation step size:", DELTA)
+    print("Mutation step size:", p.getDelta())
+
 
 main()

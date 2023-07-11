@@ -43,8 +43,17 @@ class Numeric(Problem):
         self._domain = []
         self._delta = 0.01
 
+        self._alpha = 0.01
+        self._dx = 10 ** (-4)
+
     def getDelta(self):
         return self._delta
+
+    def getAlpha(self):
+        return self._alpha
+
+    def getDx(self):
+        return self._dx
 
     def setVariables(self):  # createProblem
         ## Read in an expression and its domain from a file.
@@ -72,6 +81,39 @@ class Numeric(Problem):
 
         infile.close()
         self._domain = [varName, low, up]
+
+    def takeStep(self, x, v):
+        grad = self.gradient(x, v)
+        xCopy = x[:]
+        for i in range(len(x)):
+            xCopy[i] -= self._alpha * grad
+
+        if self.isLegal(xCopy):
+            return xCopy
+        else:
+            return x
+
+    def isLegal(self, x):
+        domain = self._domain
+        low, up = domain[1], domain[2]
+        for i in range(len(low)):
+            l, u = low[i], up[i]
+            if l <= x[i] <= u:
+                pass
+            else:
+                return False
+        return True
+
+    def gradient(self, x, v):
+        grad = []
+        for i in range(len(x)):
+            xCopy = x[:]
+            xCopy[i] += self._dx
+            df = self.evaluate(xCopy) - v
+            g = df / self._dx
+            grad.append(g)
+
+        return grad
 
     def randominit(self):
         domain = self._domain
